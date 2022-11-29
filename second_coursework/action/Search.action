@@ -1,0 +1,7 @@
+string room_name
+---
+uint32[] objects_numbers
+string[] objects_name
+---
+uint32[] current_numbers
+string[] objects_name
