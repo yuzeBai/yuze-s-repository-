@@ -13,7 +13,7 @@ def next(n):
 def room_point(req: GetRoomCoordRequest):
     res = GetRoomCoordResponse()
 
-    room_coords_A = [(-5, 4), (-3.20, 4), (-5, 1), (-3, 1)]
+    room_coords_A = [(0.78, 10), (3, 10), (2.6, 7.13), (0.927, 7)]
 
     room_coords_B = [(-2, 1.3), (-2, 4.8), (1.40, 4.7), (1.27, 1.27)]
 
@@ -45,6 +45,7 @@ def room_point(req: GetRoomCoordRequest):
     if req.room_name == "F":
         res.point.x = room_coords_F[count][0]
         res.point.y = room_coords_F[count][1]
+    rospy.loginfo(res)
     return res
 
 

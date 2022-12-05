@@ -1,7 +1,8 @@
 string room_name
 ---
+time timestamp
 uint32[] objects_numbers
 string[] objects_name
 ---
 uint32[] current_numbers
-string[] objects_name
+string[] current_name

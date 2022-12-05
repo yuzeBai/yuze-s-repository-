@@ -4,7 +4,8 @@ import actionlib
 from second_coursework.msg import SearchAction, SearchGoal, SearchResult
 
 rospy.init_node('room_action_client')
-client = actionlib.SimpleActionClient('room_action_client', SearchAction)
+client = actionlib.SimpleActionClient('search', SearchAction)
+
 client.wait_for_server()
 
 goal = SearchGoal()
