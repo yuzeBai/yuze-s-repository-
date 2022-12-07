@@ -99,7 +99,8 @@ class SearchActionServer:
                         self.result.objects_numbers = YOLO.feedback_number_list
                         self.result.objects_name = YOLO.feedback_name_list
                         self.server.set_succeeded(self.result)
-                        return 'aborted'
+                        rospy.signal_shutdown("FOUND THE CAKE!")
+                        return "preempted"
                     jump_out()
                     if sm_sub.preempt_requested():
                         sm_sub.service_preempt()

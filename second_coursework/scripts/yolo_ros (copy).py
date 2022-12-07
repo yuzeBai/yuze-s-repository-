@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # coding=utf-8
-import queue
 
 import rospy
 from cv_bridge import CvBridge
@@ -17,10 +16,10 @@ class YOLO(smach.State):
     result_times_stamp = 0
     result_name_list = []
     result_number_list = []
+
     def __init__(self):
 
         smach.State.__init__(self, outcomes=['succeeded', 'SEARCH_CAKE'], output_keys=['name_list', 'number_list'])
-        self.image_queue = queue.Queue()
         self.count = 1
         self.skip = 20
         self.frame = 0
@@ -34,13 +33,14 @@ class YOLO(smach.State):
 
     def img_callback(self, msg):
         if self.frame % self.skip == 0:
-            self.image_queue.put(self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8'))
+            self.cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
+        else:
+            self.cv_image = None
         self.frame = (self.frame + 1) % self.skip
 
     def execute(self, userdata):
-        if not self.image_queue.empty():
-            img_arr = cv2.resize(self.image_queue.get(),
-                                 (self.detector.network_width(), self.detector.network_height()))
+        if self.cv_image is not None:
+            img_arr = cv2.resize(self.cv_image, (self.detector.network_width(), self.detector.network_height()))
             detections = self.detector.perform_detect(image_path_or_buf=img_arr, show_image=True)
             for detection in detections:
                 box = detection.left_x, detection.top_y, detection.width, detection.height
@@ -55,8 +55,8 @@ class YOLO(smach.State):
                 else:
                     index = self.feedback_name_list.index(detection.class_name)
                     self.feedback_number_list[index] = self.feedback_number_list[index] + 1
-            return 'succeeded'
-        return 'preempted'
+
+        return 'succeeded'
 
 
 if __name__ == '__main__':
