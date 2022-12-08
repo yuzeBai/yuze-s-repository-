@@ -10,7 +10,7 @@ client.wait_for_server()
 
 goal = SearchGoal()
 
-goal.room_name = 'A'
+goal.room_name = 'B'
 
 client.send_goal(goal)
 client.wait_for_result()

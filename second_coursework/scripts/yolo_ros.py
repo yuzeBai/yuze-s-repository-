@@ -14,13 +14,14 @@ from yolov4 import Detector
 class YOLO(smach.State):
     feedback_name_list = []
     feedback_number_list = []
-    result_times_stamp = 0
     result_name_list = []
     result_number_list = []
+
     def __init__(self):
 
         smach.State.__init__(self, outcomes=['succeeded', 'SEARCH_CAKE'], output_keys=['name_list', 'number_list'])
         self.image_queue = queue.Queue()
+        self.result_times_stamp = 0
         self.count = 1
         self.skip = 20
         self.frame = 0
@@ -30,7 +31,7 @@ class YOLO(smach.State):
         self.detector = Detector(gpu_id=0, config_path='/opt/darknet/cfg/yolov4.cfg',
                                  weights_path='/opt/darknet/yolov4.weights',
                                  lib_darknet_path='/opt/darknet/libdarknet.so',
-                                 meta_path='src/yolo_package/config/coco.data')
+                                 meta_path='src/second_coursework/yolo_package/config/coco.data')
 
     def img_callback(self, msg):
         if self.frame % self.skip == 0:
@@ -51,7 +52,9 @@ class YOLO(smach.State):
                     self.count = 1
                     self.feedback_number_list.append(self.count)
                 elif "cake" in self.feedback_name_list:
-                    return None
+                    while (1):
+                        i = 1
+                    # return 'aborted'
                 else:
                     index = self.feedback_name_list.index(detection.class_name)
                     self.feedback_number_list[index] = self.feedback_number_list[index] + 1

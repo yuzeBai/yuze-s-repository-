@@ -15,10 +15,10 @@ from yolo_ros import YOLO
 
 
 class SearchActionServer:
-    result = SearchResult()
-    feedback = SearchFeedback()
 
     def __init__(self):
+        self.result = SearchResult()
+        self.feedback = SearchFeedback()
         self.server = actionlib.SimpleActionServer('search', SearchAction, self.execute, False)
         self.server.start()
 
@@ -43,8 +43,6 @@ class SearchActionServer:
                 if outcome_map['GO_TO_ROOM'] == 'succeeded':
                     return True
                 if outcome_map['SEARCH_CAKE'] == 'succeeded':
-                    rate_1 = rospy.Rate(20)
-                    rate_1.sleep()
                     return True
                 return False
 
@@ -52,15 +50,15 @@ class SearchActionServer:
                 outcomes=['succeeded'],
                 input_keys=['request_coord', 'feedback_name_list', 'feedback_number_list'],
                 default_outcome='succeeded',
-                child_termination_cb=child_term_cb,
+                child_termination_cb=child_term_cb, )
 
-                outcome_map={'succeeded': {'GO_TO_ROOM': 'succeeded'}
-                             #                            'FEEDBACK': 'succeeded',
-                             #                        # 'SEARCH_CAKE': 'succeeded'
-                             #                        },
-                             #          # 'succeeded': {'SEARCH_CAKE': 'succeeded'},
-                             #              'succeeded': {'FEEDBACK': 'succeeded'}
-                             })
+            # outcome_map={'succeeded': {'GO_TO_ROOM': 'succeeded'}
+            #              #                            'FEEDBACK': 'succeeded',
+            #              #                        # 'SEARCH_CAKE': 'succeeded'
+            #              #                        },
+            #              #          # 'succeeded': {'SEARCH_CAKE': 'succeeded'},
+            #              #              'succeeded': {'FEEDBACK': 'succeeded'}
+            #              })
             with cc:
                 smach.Concurrence.add('SEARCH_CAKE', YOLO(),
                                       remapping={'name_list': 'feedback_name_list',
@@ -69,11 +67,17 @@ class SearchActionServer:
 
                 def goal_callback(userdata, default_goal):
                     goal = MoveBaseGoal()
+                    goal_new = SearchGoal()
                     goal.target_pose.header.stamp = rospy.get_rostime()
                     goal.target_pose.header.frame_id = 'map'
                     goal.target_pose.pose.position.x = userdata.target_pose.x
                     goal.target_pose.pose.position.y = userdata.target_pose.y
                     goal.target_pose.pose.orientation.w = 1
+                    if 'cake' in YOLO.feedback_name_list:
+                        while (1):
+                            rospy.loginfo("THE CAKE FOUND!")
+                            rospy.sleep(40)
+                            i = 1
                     return goal
 
                 smach.Concurrence.add('GO_TO_ROOM',
@@ -95,10 +99,11 @@ class SearchActionServer:
                         self.server.publish_feedback(self.feedback)
                         rate.sleep()
                     else:
+                        rospy.loginfo("FOUND THE CAKE!")
                         self.result.timestamp = rospy.Time.now()
                         self.result.objects_numbers = YOLO.feedback_number_list
                         self.result.objects_name = YOLO.feedback_name_list
-                        self.server.set_succeeded(self.result)
+                        self.server.set_succeeded(self.result, 'FOUND THE CAKE')
                         return 'aborted'
                     jump_out()
                     if sm_sub.preempt_requested():
